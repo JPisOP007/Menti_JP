@@ -1,14 +1,12 @@
-# myproject/settings.py
-
 import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-# Load environment variables from a custom file
+
 env_path = os.path.join(Path(__file__).resolve().parent.parent, 'config.env')
 load_dotenv(dotenv_path=env_path)
 
-# Now you can access your API key like this
+
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 
 BASE_DIR = Path(__file__).resolve().parent.parent
