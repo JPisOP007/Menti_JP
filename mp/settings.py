@@ -2,10 +2,8 @@ import os
 from pathlib import Path
 from dotenv import load_dotenv
 
-
 env_path = os.path.join(Path(__file__).resolve().parent.parent, 'config.env')
 load_dotenv(dotenv_path=env_path)
-
 
 GROQ_API_KEY = os.getenv('GROQ_API_KEY')
 

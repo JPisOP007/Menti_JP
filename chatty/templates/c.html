@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+    {% load static %} <!-- Load static files template tag -->
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Chatbot</title>
+    <link rel="icon" href="{% static 'path/to/favicon.ico' %}" type="image/x-icon"> <!-- Update with your favicon path -->
     <style>
         body {
             font-family: 'Arial', sans-serif;
@@ -101,6 +103,13 @@
             margin: 0;
             font-size: 24px;
         }
+
+        .error-message {
+            color: red;
+            font-weight: bold;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
@@ -111,8 +120,10 @@
         </div>
         <div class="input-area">
             <textarea id="user-input" rows="2" placeholder="Type your message here..."></textarea>
+            <input type="hidden" name="csrfmiddlewaretoken" value="{{ csrf_token }}">
             <button id="send-button">Send</button>
         </div>
+        <div class="error-message" id="error-message" style="display: none;"></div> <!-- Error message display -->
     </div>
 
     <script>
@@ -139,6 +150,7 @@
         function sendMessage() {
             const message = document.getElementById('user-input').value;
             const chatbox = document.getElementById('chatbox');
+            const errorMessage = document.getElementById('error-message');
 
             if (message.trim() === '') return; // Prevent sending empty messages
 
@@ -158,9 +170,14 @@
                     'Content-Type': 'application/x-www-form-urlencoded',
                     'X-CSRFToken': csrftoken,
                 },
-                body: 'message=' + encodeURIComponent(message)
+                body: 'message=' + encodeURIComponent(message) + '&csrfmiddlewaretoken=' + encodeURIComponent(csrftoken)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.message) {
                     // Display chatbot's response in the chatbox
@@ -170,12 +187,18 @@
                     chatbox.appendChild(botMessage);
                 } else {
                     console.error('Error:', data.error);
+                    errorMessage.textContent = "An error occurred. Please try again.";
+                    errorMessage.style.display = 'block';
                 }
                 
                 // Scroll to the bottom of the chatbox
                 chatbox.scrollTop = chatbox.scrollHeight;
             })
-            .catch(error => console.error('Error:', error));
+            .catch(error => {
+                console.error('Error:', error);
+                errorMessage.textContent = "An error occurred. Please try again.";
+                errorMessage.style.display = 'block';
+            });
         }
 
         // Event listener for the "Send" button click
